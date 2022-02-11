@@ -1,11 +1,11 @@
 const express = require('express')
 const app = express()
 
+const apiRoutes = require('./api/routes')
+
 app.use(express.static('public'))
 
-app.get('/api/', (req, res) => (
-    res.json({hello: 'world'})
-))
+app.use('/api/', apiRoutes)
 
 const PORT = process.env.PORT || 5000
 
