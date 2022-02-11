@@ -1,0 +1,19 @@
+{
+  "name": "Voltaire",
+  "version": "1.0.0",
+  "description": "A web chat",
+  "main": "src/app.js",
+  "repository": "https://github.com/BRonen/Voltaire.git",
+  "author": "Brenno Rodrigues <brennopereira6@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js"
+  },
+  "dependencies": {
+    "express": "^4.17.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
+}
