@@ -8,13 +8,14 @@
   "license": "MIT",
   "scripts": {
     "start": "NODE_ENV=production node src/app.js",
-    
     "predev": "NODE_ENV=development sequelize db:migrate",
     "dev": "NODE_ENV=development nodemon -r dotenv/config src/app.js"
   },
   "dependencies": {
+    "bcrypt": "^5.0.1",
     "dotenv": "^16.0.0",
     "express": "^4.17.2",
+    "jsonwebtoken": "^8.5.1",
     "pg": "^8.7.3",
     "sequelize": "^6.16.1"
   },
