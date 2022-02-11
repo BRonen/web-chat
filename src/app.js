@@ -3,6 +3,8 @@ const app = express()
 
 const apiRoutes = require('./api/routes')
 
+app.use(express.json())
+
 app.use(express.static('public'))
 
 app.use('/api/', apiRoutes)
