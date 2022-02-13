@@ -5,8 +5,121 @@
         <meta http-equiv='X-UA-Compatible' content='IE=edge'>
         <meta name='viewport' content='width=device-width, initial-scale=1'>
         <title>Voltaire</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
+        <style>
+            #chat{
+                border: 1px solid #000;
+                border-radius: 30px;
+
+                padding: 20px;
+            }
+            #messages{
+                border: 1px solid #000;
+                border-radius: 15px;
+
+                padding: 10px;
+
+                margin-bottom: 15px;
+            }
+            #messageInput{
+                width: 90%;
+                height: 25px;
+            }
+            .message{
+                border: 1px solid #000;
+                border-radius: 10px;
+
+                padding: 5px;
+            }
+        </style>
     </head>
     <body>
-        
+        <div id="login">
+            <h1>Login</h1>
+            <input type="email" id="email"/>
+            <input type="text" id="password"/>
+            <button onclick="login()">Login</button>
+        </div>
+        <div id="chat">
+            <div id="messages">
+                <center><h1>WEB CHAT</h1></center>
+            </div>
+            <div id="sender">
+                <input type="text" id="messageInput" placeholder="Message:"/>
+                <button id="messageSubmit" onclick="messageHandler()">Send</button>
+            </div>
+        </div>
+        <script>
+            USER = {}
+
+            function login(){
+                const bodyContent = {
+                    email: document.querySelector('#email').value,
+                    password: document.querySelector('#password').value
+                }
+
+                const token = fetch('/api/auth', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(bodyContent)
+                })
+                .then(res => {
+                    return res.json()
+                })
+                .then(res => {
+                    USER.token = res.token
+                    fetchUserInfo(USER.token)
+                })
+            }
+
+            function fetchUserInfo(token){
+                const headers = new Headers({
+                    'authorization': 'bearer '+token
+                })
+
+                fetch('/api/auth', {
+                    method: 'get',
+                    headers: headers
+                })
+                .then(res => {
+                    return res.json()
+                })
+                .then(res => {
+                    console.log(res)
+                })
+            }
+
+            const socket = io("http://localhost:5000")
+            console.log(socket)
+            socket.on('message:send', ({content, author}) => {
+                document.querySelector('#messages').innerHTML += `
+                    <div class="message">
+                        ${author}: ${content}    
+                    </div>
+                `
+            })
+
+            function messageHandler(){
+                const { value } = document.querySelector('#messageInput')
+                fetch('/api/messages', {
+                    method: 'post',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'authorization': 'bearer '+USER.token
+                    },
+                    body: JSON.stringify({content: value})
+                })
+                .then(res => {
+                    return res.json()
+                })
+                .then(res => {
+                    console.log(res)
+                })
+            }
+        </script>
     </body>
 </html>
