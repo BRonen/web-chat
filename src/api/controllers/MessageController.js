@@ -1,26 +1,20 @@
-const { User } = require('../models')
-
-const messages = []
+const { Message } = require('../models')
 
 module.exports = {
   async index(req, res){
-    req.io.emit('message:all', messages)
-
-    return res.json({ok: true})
+    const messages = await Message.findAll({
+      include: {
+        association: 'author',
+        attributes: {
+          exclude: ['password']
+        }
+      }
+    })
+    return res.json({messages})
   },
 
   async store(req, res){
     const { userId } = req
-
-    const user = await User.findByPk(userId)
-
-    console.log(userId, user)
-
-    if(!user)
-      return res.status(404).json({
-        err: 'user not found'
-      })
-
     const { content } = req.body
 
     if(!content)
@@ -28,15 +22,19 @@ module.exports = {
         err: 'message content invalid'
       })
 
-    const message = {
-        author: user.name,
-        content: content
-    }
+    const message = await Message.create({
+      userId: userId,
+      content: content
+    })
 
-    messages.push(message)
+    const author = await message.getAuthor({
+      attributes: {
+        exclude: ['password']
+      }
+    })
 
-    req.io.emit('message:send', message)
+    req.io.emit('message:send', message.dataValues, author)
 
-    return res.json({ok: true})
+    return res.json({ message, author })
   },
 }

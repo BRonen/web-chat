@@ -1,4 +1,8 @@
+const { WSmiddleware } = require('../middlewares/auth')
+
 function setupSocketIO(io){
+    io.use(WSmiddleware)
+
     io.on('connection', function(socket) {
         //default room
         const room = 'default'

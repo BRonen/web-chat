@@ -36,8 +36,8 @@
     <body>
         <div id="login">
             <h1>Login</h1>
-            <input type="email" id="email"/>
-            <input type="text" id="password"/>
+            <input type="email" id="email" value="admin@admin.com"/>
+            <input type="text" id="password" value="admin"/>
             <button onclick="login()">Login</button>
         </div>
         <div id="chat">
@@ -50,6 +50,14 @@
             </div>
         </div>
         <script>
+            function escape(htmlStr) {
+                return htmlStr. replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#39;")
+            }
+
             USER = {}
 
             function login(){
@@ -89,20 +97,56 @@
                 })
                 .then(res => {
                     console.log(res)
+                    alert('logged sucessfull')
+                    getOldMessages(token)
                 })
             }
 
-            const socket = io("http://localhost:5000")
-            console.log(socket)
-            socket.on('message:send', ({content, author}) => {
-                document.querySelector('#messages').innerHTML += `
-                    <div class="message">
-                        ${author}: ${content}    
-                    </div>
-                `
-            })
+            function getOldMessages(token){
+                const headers = new Headers({
+                    'authorization': 'bearer '+token
+                })
+
+                fetch('/api/messages', {
+                    method: 'get',
+                    headers: headers
+                })
+                .then(res => {
+                    return res.json()
+                })
+                .then(res => {
+                    res.messages.map((message, index) => {
+                        console.log(message)
+                        document.querySelector('#messages').innerHTML += `
+                            <div class="message">
+                                ${message.author.name}: ${escape(message.content)}    
+                            </div>
+                        `
+                    })
+                    setupWS()
+                })
+            }
+
+            function setupWS(){
+                const socket = io("https://dbed-191-136-56-205.ngrok.io", {
+                    auth: {
+                        token: USER.token
+                    }
+                })
+                console.log(socket)
+                socket.on('message:send', (message, author) => {
+                    document.querySelector('#messages').innerHTML += `
+                        <div class="message">
+                            ${author.name}: ${escape(message.content)}    
+                        </div>
+                    `
+                })
+                USER.socket = socket
+            }
 
             function messageHandler(){
+                if(!USER.token)
+                    return alert('not loged yet')
                 const { value } = document.querySelector('#messageInput')
                 fetch('/api/messages', {
                     method: 'post',

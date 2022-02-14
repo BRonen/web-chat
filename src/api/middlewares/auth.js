@@ -8,7 +8,16 @@ function genToken(params){
   })
 }
 
-function authTest(req, res, next){
+function verify(token, callback, errCallback){
+  jwt.verify(token, jwtSecret, (err, decoded) => {
+    if(err)
+      return errCallback()
+    
+    return callback(decoded)
+  })
+}
+
+function authMiddleware(req, res, next){
   const { authorization } = req.headers
   
   if(!authorization)
@@ -24,14 +33,29 @@ function authTest(req, res, next){
   if(!/^Bearer$/i.test(scheme))
     return res.status(401).json({err: 'unbearable'})
   
-  jwt.verify(token, jwtSecret, (err, decoded) => {
-    if(err)
-      return res.status(401).json({err: 'token invalid'})
-    
-    req.userId = decoded.id
-    
-    return next()
-  })
+  return verify(token,
+    decoded => {
+      req.userId = decoded.id
+      return next()
+    },
+    () => (
+      res.status(401).json({err: 'token invalid'})
+    )
+  )
 }
 
-module.exports = { genToken, authTest }
+function WSmiddleware(socket, next){
+  const { token } = socket.handshake.auth
+
+  return verify(token,
+    decoded => {
+      socket.userId = decoded.id
+      return next()
+    },
+    () => (
+      socket.emit('auth:error', 'token invalid')
+    )
+  )
+}
+
+module.exports = { genToken, authMiddleware, WSmiddleware }
