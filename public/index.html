@@ -36,8 +36,8 @@
     <body>
         <div id="login">
             <h1>Login</h1>
-            <input type="email" id="email" value="admin@admin.com"/>
-            <input type="text" id="password" value="admin"/>
+            <input type="email" id="email"/>
+            <input type="text" id="password"/>
             <button onclick="login()">Login</button>
         </div>
         <div id="chat">
@@ -128,7 +128,7 @@
             }
 
             function setupWS(){
-                const socket = io("https://dbed-191-136-56-205.ngrok.io", {
+                const socket = io(window.location.href, {
                     auth: {
                         token: USER.token
                     }
