@@ -4,7 +4,7 @@ module.exports = {
   development: {
     dialect:  'sqlite',
     storage:  './temp/database.sqlite',
-    logging:  false,
+    logging:  console.log,
   },
   production: {
     database: process.env.DB_DTBS,
@@ -12,5 +12,13 @@ module.exports = {
     password: process.env.DB_PSWD,
     host:     process.env.DB_HOST,
     dialect:  process.env.DB_DLCT,
+    logging:  false,
+    ssl: true, 
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
+    },
   },
 }
