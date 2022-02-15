@@ -5,8 +5,179 @@
         <meta http-equiv='X-UA-Compatible' content='IE=edge'>
         <meta name='viewport' content='width=device-width, initial-scale=1'>
         <title>Voltaire</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
+        <style>
+            #chat{
+                border: 1px solid #000;
+                border-radius: 30px;
+
+                padding: 20px;
+            }
+            #messages{
+                border: 1px solid #000;
+                border-radius: 15px;
+
+                padding: 10px;
+
+                margin-bottom: 15px;
+            }
+            input{
+                width: 90%;
+                height: 25px;
+            }
+            button{
+                height: 50px;
+            }
+            .message{
+                border: 1px solid #000;
+                border-radius: 10px;
+
+                margin-top: 5px;
+
+                padding: 5px;
+            }
+            #login{
+                border: 1px solid #000;
+                border-radius: 30px;
+
+                margin: 10px;
+
+                padding: 20px;
+                padding-top: 0;
+            }
+        </style>
     </head>
     <body>
-        
+        <div id="login">
+            <h1>Login</h1>
+            <input type="email" id="email" placeholder="email:"/>
+            <input type="text" id="password" placeholder="password:"/>
+            <button onclick="login()">Login</button>
+        </div>
+        <div id="chat">
+            <div id="messages">
+                <center><h1>WEB CHAT</h1></center>
+            </div>
+            <div id="sender">
+                <input type="text" id="messageInput" placeholder="Message:"/>
+                <button id="messageSubmit" onclick="messageHandler()">Send</button>
+            </div>
+        </div>
+        <script>
+            function escape(htmlStr) {
+                return htmlStr. replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#39;")
+            }
+
+            USER = {}
+
+            function login(){
+                const bodyContent = {
+                    email: document.querySelector('#email').value,
+                    password: document.querySelector('#password').value
+                }
+
+                const token = fetch('/api/auth', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(bodyContent)
+                })
+                .then(res => {
+                    return res.json()
+                })
+                .then(res => {
+                    USER.token = res.token
+                    fetchUserInfo(USER.token)
+                })
+            }
+
+            function fetchUserInfo(token){
+                const headers = new Headers({
+                    'authorization': 'bearer '+token
+                })
+
+                fetch('/api/auth', {
+                    method: 'get',
+                    headers: headers
+                })
+                .then(res => {
+                    return res.json()
+                })
+                .then(res => {
+                    console.log(res)
+                    alert('logged sucessfull')
+                    getOldMessages(token)
+                })
+            }
+
+            function getOldMessages(token){
+                const headers = new Headers({
+                    'authorization': 'bearer '+token
+                })
+
+                fetch('/api/messages', {
+                    method: 'get',
+                    headers: headers
+                })
+                .then(res => {
+                    return res.json()
+                })
+                .then(res => {
+                    res.messages.map((message, index) => {
+                        console.log(message)
+                        document.querySelector('#messages').innerHTML += `
+                            <div class="message">
+                                ${message.author.name}: ${escape(message.content)}    
+                            </div>
+                        `
+                    })
+                    setupWS()
+                })
+            }
+
+            function setupWS(){
+                const socket = io(window.location.href, {
+                    auth: {
+                        token: USER.token
+                    }
+                })
+                console.log(socket)
+                socket.on('message:send', (message, author) => {
+                    document.querySelector('#messages').innerHTML += `
+                        <div class="message">
+                            ${author.name}: ${escape(message.content)}    
+                        </div>
+                    `
+                })
+                USER.socket = socket
+            }
+
+            function messageHandler(){
+                if(!USER.token)
+                    return alert('not loged yet')
+                const { value } = document.querySelector('#messageInput')
+                fetch('/api/messages', {
+                    method: 'post',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'authorization': 'bearer '+USER.token
+                    },
+                    body: JSON.stringify({content: value})
+                })
+                .then(res => {
+                    return res.json()
+                })
+                .then(res => {
+                    console.log(res)
+                })
+            }
+        </script>
     </body>
 </html>
