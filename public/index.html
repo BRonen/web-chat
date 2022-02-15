@@ -21,23 +21,37 @@
 
                 margin-bottom: 15px;
             }
-            #messageInput{
+            input{
                 width: 90%;
                 height: 25px;
+            }
+            button{
+                height: 50px;
             }
             .message{
                 border: 1px solid #000;
                 border-radius: 10px;
 
+                margin-top: 5px;
+
                 padding: 5px;
+            }
+            #login{
+                border: 1px solid #000;
+                border-radius: 30px;
+
+                margin: 10px;
+
+                padding: 20px;
+                padding-top: 0;
             }
         </style>
     </head>
     <body>
         <div id="login">
             <h1>Login</h1>
-            <input type="email" id="email"/>
-            <input type="text" id="password"/>
+            <input type="email" id="email" placeholder="email:"/>
+            <input type="text" id="password" placeholder="password:"/>
             <button onclick="login()">Login</button>
         </div>
         <div id="chat">
