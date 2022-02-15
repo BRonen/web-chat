@@ -18,5 +18,6 @@ router.get('/users', UserController.index)
       
 router.get('/messages', authMiddleware, MessageController.index)
       .post('/messages', authMiddleware, MessageController.store)
+      .delete('/messages/all', authMiddleware, MessageController.clear)
 
 module.exports = router
