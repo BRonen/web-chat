@@ -10,6 +10,14 @@ module.exports = {
         attributes: { exclude: ['password'] }
     })
 
+    if(!user)
+      return res.status(404).json({
+        err: 'user not found'
+      })
+
+    if(!user.verified)
+      return res.status(403).json({err: 'user not verified'})
+
     return res.json(user)
   },
 

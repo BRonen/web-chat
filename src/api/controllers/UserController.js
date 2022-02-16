@@ -1,6 +1,7 @@
 const { User } = require('../models')
 
 const { mailSender } = require('../etc/mailsender')
+const res = require('express/lib/response')
 
 module.exports = {
   async index(req, res){
@@ -9,6 +10,11 @@ module.exports = {
     const user = await User.findByPk(userId, {
       attributes: { exclude: ['password'] }
     })
+
+    if(!user)
+      return res.status(404).json({
+        err: 'user not found'
+      })
 
     if(!user.verified)
       return res.status(403).json({err: 'user not verified'})
@@ -61,5 +67,17 @@ module.exports = {
     await user.update({ verified: true })
 
     return res.json({ok: true})
+  },
+
+  async delete(req, res){
+    const { userId } = req
+
+    const isDeleted = await User.destroy({
+      where: {
+        id: userId
+      }
+    })
+
+    return res.json({ok: isDeleted})
   }
 }

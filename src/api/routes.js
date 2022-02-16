@@ -16,6 +16,7 @@ router.get('/auth', authMiddleware, AuthController.index)
 router.get('/users', authMiddleware, UserController.index)
       .get('/users/verify', UserController.verify)
       .post('/users', UserController.store)
+      .delete('/users', authMiddleware, UserController.delete)
       
 router.get('/messages', authMiddleware, MessageController.index)
       .post('/messages', authMiddleware, MessageController.store)
