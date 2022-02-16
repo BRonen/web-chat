@@ -1,7 +1,6 @@
 const { User } = require('../models')
 
 const { mailSender } = require('../etc/mailsender')
-const res = require('express/lib/response')
 
 module.exports = {
   async index(req, res){
