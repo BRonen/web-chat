@@ -5,6 +5,7 @@ const { genToken } = require('../middlewares/auth')
 module.exports = {
   async index(req, res){
     const { userId } = req
+
     const user = await User.findByPk(userId, {
         attributes: { exclude: ['password'] }
     })
@@ -34,6 +35,9 @@ module.exports = {
       return res.status(404).json({
         err: 'user not found'
       })
+
+    if(!user.verified)
+      return res.status(403).json({err: 'user not verified'})
 
     if(user.auth(password)){
         return res.json({

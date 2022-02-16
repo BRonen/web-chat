@@ -13,11 +13,13 @@ router.get('/', (req, res) => (
 router.get('/auth', authMiddleware, AuthController.index)
       .post('/auth', AuthController.store)
 
-router.get('/users', UserController.index)
+router.get('/users', authMiddleware, UserController.index)
+      .get('/users/verify', UserController.verify)
       .post('/users', UserController.store)
       
 router.get('/messages', authMiddleware, MessageController.index)
       .post('/messages', authMiddleware, MessageController.store)
+      .delete('/messages', authMiddleware, MessageController.delete)
       .delete('/messages/all', authMiddleware, MessageController.clear)
 
 module.exports = router

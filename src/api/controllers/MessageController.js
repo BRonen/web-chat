@@ -38,13 +38,29 @@ module.exports = {
     return res.json({ message, author })
   },
 
-  async clear(req, res){
-    const messages = await Message.findAll()
-
-    messages.forEach(async message => {
-      await message.destroy({ truncate: true, force: true })
+  async delete(req, res){
+    const { messageId } = req.body
+    
+    const messages = await Message.findAll({
+      where: {
+        id: messageId
+      }
     })
 
-    return res.json({ok: true})
+    messages.forEach(async message => {
+      await message.destroy()
+
+      req.io.emit('message:delete', message.id)
+    })
+
+    return res.json({messages})
+  },
+
+  async clear(req, res){
+    const messages = await Message.destroy({
+      where: {}
+    })
+
+    return res.json({messages})
   },
 }

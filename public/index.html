@@ -150,10 +150,13 @@
                 console.log(socket)
                 socket.on('message:send', (message, author) => {
                     document.querySelector('#messages').innerHTML += `
-                        <div class="message">
+                        <div class="message" id="message${message.id}"">
                             ${author.name}: ${escape(message.content)}    
                         </div>
                     `
+                })
+                socket.on('message:delete', messageId => {
+                    console.log(`message with id ${messageId} has been deleted`)
                 })
                 USER.socket = socket
             }
