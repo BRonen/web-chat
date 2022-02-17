@@ -59,9 +59,8 @@ module.exports = {
 
     const user = await User.findByPk(userId)
     
-    if(user.verified){
+    if(user.verified)
       return res.json({err: 'user already verified'})
-    }
 
     await user.update({ verified: true })
 

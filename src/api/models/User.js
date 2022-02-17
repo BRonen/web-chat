@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
       email: {
         type: DataTypes.STRING,
         allowNull: false,
+        unique: true,
       },
       password: {
         type: DataTypes.STRING,
@@ -44,6 +45,7 @@ module.exports = (sequelize, DataTypes) => {
 
   User.associate = models => {
     User.hasMany(models.Message, { foreignKey: 'userId', as: 'messages' })
+    User.belongsToMany(models.Room, { foreignKey: 'userId', as: 'rooms', through: 'user_rooms' })
   }
 
   return User

@@ -2,6 +2,7 @@ const router = require('express').Router()
 
 const UserController = require('./controllers/UserController')
 const AuthController = require('./controllers/AuthController')
+const RoomController = require('./controllers/RoomController')
 const MessageController = require('./controllers/MessageController')
 
 const { authMiddleware } =  require('./middlewares/auth')
@@ -17,10 +18,13 @@ router.get('/users', authMiddleware, UserController.index)
       .get('/users/verify', UserController.verify)
       .post('/users', UserController.store)
       .delete('/users', authMiddleware, UserController.delete)
-      
-router.get('/messages', authMiddleware, MessageController.index)
-      .post('/messages', authMiddleware, MessageController.store)
-      .delete('/messages', authMiddleware, MessageController.delete)
-      .delete('/messages/all', authMiddleware, MessageController.clear)
+
+router.get('/rooms', authMiddleware, RoomController.index)
+      .post('/rooms', authMiddleware, RoomController.store)
+      .post('/rooms/connect', authMiddleware, RoomController.connect)
+
+router.get('/rooms/:roomId/messages', authMiddleware, MessageController.index)
+      .post('/rooms/:roomId/messages', authMiddleware, MessageController.store)
+      .delete('/rooms/:roomId/messages', authMiddleware, MessageController.delete)
 
 module.exports = router
