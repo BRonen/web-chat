@@ -1,20 +1,37 @@
-const { Message } = require('../models')
+const { Room, Message } = require('../models')
 
 module.exports = {
   async index(req, res){
-    const messages = await Message.findAll({
+    const { userId } = req
+    const { roomId } = req.params
+
+    const room = await Room.findByPk(roomId, {
       include: {
-        association: 'author',
-        attributes: {
-          exclude: ['password']
+        association: 'messages',
+        include: {
+          association: 'author',
+          attributes: {
+            exclude: ['password']
+          }
         }
       }
     })
+
+    const inRoom = room.hasUser(userId)
+
+    if(!inRoom)
+      return res.status(503).json({
+        err: 'user isnt in this room'
+      })
+
+    const { messages } = room
+
     return res.json({messages})
   },
 
   async store(req, res){
     const { userId } = req
+    const { roomId } = req.params
     const { content } = req.body
 
     if(!content)
@@ -24,7 +41,8 @@ module.exports = {
 
     const message = await Message.create({
       userId: userId,
-      content: content
+      content: content,
+      roomId: roomId
     })
 
     const author = await message.getAuthor({
@@ -38,13 +56,33 @@ module.exports = {
     return res.json({ message, author })
   },
 
-  async clear(req, res){
-    const messages = await Message.findAll()
-
-    messages.forEach(async message => {
-      await message.destroy({ truncate: true, force: true })
+  async delete(req, res){
+    const { userId } = req
+    const { roomId } = req.params
+    const { messageId } = req.body
+    
+    const messages = await Message.findAll({
+      where: {
+        id: messageId,
+        roomId: roomId,
+        userId: userId
+      }
     })
 
-    return res.json({ok: true})
+    messages.forEach(async message => {
+      await message.destroy()
+
+      req.io.emit('message:delete', message.id)
+    })
+
+    return res.json({messages})
+  },
+
+  async clear(req, res){
+    const messages = await Message.destroy({
+      where: {}
+    })
+
+    return res.json({messages})
   },
 }

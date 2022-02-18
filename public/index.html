@@ -21,13 +21,6 @@
 
                 margin-bottom: 15px;
             }
-            input{
-                width: 90%;
-                height: 25px;
-            }
-            button{
-                height: 50px;
-            }
             .message{
                 border: 1px solid #000;
                 border-radius: 10px;
@@ -35,6 +28,37 @@
                 margin-top: 5px;
 
                 padding: 5px;
+            }
+            #rooms{
+                border: 1px solid #000;
+                border-radius: 15px;
+
+                padding: 10px;
+
+                margin-bottom: 15px;
+            }
+            .room{
+                border: 1px solid #000;
+                border-radius: 10px;
+
+                margin-top: 5px;
+
+                padding: 5px;
+            }
+            .room-current{
+                border: 1px solid #F00;
+                border-radius: 10px;
+
+                margin-top: 5px;
+
+                padding: 5px;
+            }
+            input{
+                width: 90%;
+                height: 25px;
+            }
+            button{
+                height: 50px;
             }
             #login{
                 border: 1px solid #000;
@@ -52,9 +76,12 @@
             <h1>Login</h1>
             <input type="email" id="email" placeholder="email:"/>
             <input type="text" id="password" placeholder="password:"/>
-            <button onclick="login()">Login</button>
+            <button onclick="getToken(USER)">Login</button>
         </div>
         <div id="chat">
+            <div id="rooms">
+                <center><h1>Rooms</h1></center>
+            </div>
             <div id="messages">
                 <center><h1>WEB CHAT</h1></center>
             </div>
@@ -65,22 +92,21 @@
         </div>
         <script>
             function escape(htmlStr) {
-                return htmlStr. replace(/&/g, "&amp;")
+                return htmlStr
+                    .replace(/&/g, "&amp;")
                     .replace(/</g, "&lt;")
                     .replace(/>/g, "&gt;")
                     .replace(/"/g, "&quot;")
                     .replace(/'/g, "&#39;")
             }
 
-            USER = {}
-
-            function login(){
+            async function getToken(user){
                 const bodyContent = {
                     email: document.querySelector('#email').value,
                     password: document.querySelector('#password').value
                 }
 
-                const token = fetch('/api/auth', {
+                const response = await fetch('/api/auth', {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json',
@@ -88,57 +114,61 @@
                     },
                     body: JSON.stringify(bodyContent)
                 })
-                .then(res => {
-                    return res.json()
-                })
-                .then(res => {
-                    USER.token = res.token
-                    fetchUserInfo(USER.token)
-                })
+
+                const { token } = await response.json()
+
+                user.token = token
+
+                await getUserInfo(user)
             }
 
-            function fetchUserInfo(token){
+            async function getUserInfo(user){
                 const headers = new Headers({
-                    'authorization': 'bearer '+token
+                    'authorization': `bearer ${user.token}`
                 })
 
-                fetch('/api/auth', {
+                const response = await fetch('/api/auth', {
                     method: 'get',
                     headers: headers
                 })
-                .then(res => {
-                    return res.json()
-                })
-                .then(res => {
-                    console.log(res)
-                    alert('logged sucessfull')
-                    getOldMessages(token)
-                })
+                
+                const userInfo = await response.json()
+
+                user = {...user, userInfo}
+
+                console.log(user)
+                alert('logged sucessfull')
+
+                await getRooms(user)
             }
 
-            function getOldMessages(token){
+            async function getRooms(user){
                 const headers = new Headers({
-                    'authorization': 'bearer '+token
+                    'authorization': `bearer ${user.token}`
                 })
 
-                fetch('/api/messages', {
+                const response = await fetch('/api/rooms', {
                     method: 'get',
                     headers: headers
                 })
-                .then(res => {
-                    return res.json()
+                
+                const { rooms } = await response.json()
+                
+                USER.rooms = rooms
+
+                document.querySelector('#rooms').innerHTML = `
+                        <center><h1>Rooms</h1></center>
+                    `
+                rooms.forEach((room, index) => {
+                    document.querySelector('#rooms').innerHTML += `
+                        <div class="room" id="room${room.id}"
+                         onclick="getInRoom('${room.id}', '${room.name}')">
+                            ${room.name}
+                        </div>
+                    `
                 })
-                .then(res => {
-                    res.messages.map((message, index) => {
-                        console.log(message)
-                        document.querySelector('#messages').innerHTML += `
-                            <div class="message">
-                                ${message.author.name}: ${escape(message.content)}    
-                            </div>
-                        `
-                    })
-                    setupWS()
-                })
+
+                setupWS()
             }
 
             function setupWS(){
@@ -150,19 +180,76 @@
                 console.log(socket)
                 socket.on('message:send', (message, author) => {
                     document.querySelector('#messages').innerHTML += `
-                        <div class="message">
+                        <div class="message" id="message${message.id}">
                             ${author.name}: ${escape(message.content)}    
                         </div>
                     `
                 })
+                socket.on('message:delete', messageId => {
+                    console.log(`message with id ${messageId} has been deleted`)
+                })
+
                 USER.socket = socket
             }
 
-            function messageHandler(){
+            async function getInRoom(id, name){
+                alert(`enter on id ${id} with the name ${name}`)
+
+                const newRoomDiv = document.querySelector(`#room${id}`)
+                newRoomDiv.classList.add('room-current')
+
+                if(USER.currentRoom)
+                    document.querySelector(`#room${USER.currentRoom}`)
+                        .classList.remove('room-current')
+                
+                USER.currentRoom = id
+
+                const messages = await getRoomMessages()
+
+                document.querySelector('#messages').innerHTML = `
+                        <center><h1>WEB CHAT</h1></center>
+                    `
+                if(messages.length === 0){
+                    document.querySelector('#messages').innerHTML += `
+                        <center><h2>Any messages yet...</h2></center>
+                    `
+                    return
+                }
+                messages.forEach(message => {
+                    document.querySelector('#messages').innerHTML += `
+                        <div class="message" id="message${message.id}">
+                            ${message.author.name}: ${escape(message.content)}    
+                        </div>
+                    `
+                })
+            }
+
+            async function getRoomMessages(roomId){
+                const headers = new Headers({
+                    'authorization': `bearer ${USER.token}`
+                })
+
+                const response = await fetch(`/api/rooms/${USER.currentRoom}/messages`, {
+                    method: 'GET',
+                    headers: headers
+                })
+
+                const { messages } = await response.json()
+
+                return messages
+            }
+
+            async function messageHandler(){
                 if(!USER.token)
                     return alert('not loged yet')
+
+                if(!USER.currentRoom)
+                    return alert('not in a room')
+
                 const { value } = document.querySelector('#messageInput')
-                fetch('/api/messages', {
+                const roomId = USER.currentRoom
+
+                const response = await fetch(`/api/rooms/${roomId}/messages`, {
                     method: 'post',
                     headers: {
                         'Accept': 'application/json',
@@ -171,13 +258,12 @@
                     },
                     body: JSON.stringify({content: value})
                 })
-                .then(res => {
-                    return res.json()
-                })
-                .then(res => {
-                    console.log(res)
-                })
+                const { message } = await response.json()
+
+                console.log(message)
             }
+
+            const USER = {}
         </script>
     </body>
 </html>

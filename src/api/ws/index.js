@@ -3,13 +3,15 @@ const { WSmiddleware } = require('../middlewares/auth')
 function setupSocketIO(io){
     io.use(WSmiddleware)
 
-    io.on('connection', function(socket) {
-        //default room
-        const room = 'default'
-        socket.join(room)
-     
+    io.on('connection', socket => {
         //disconnect
-        socket.on('disconnect', function() {
+        socket.on('disconnecting', socket => {
+            if(socket.rooms){
+                for(const room of socket.rooms){
+                    if(room !== socket.id)
+                        socket.to(room).emit("user:left", socket.id)
+                }
+            }
         })
     })
 }
