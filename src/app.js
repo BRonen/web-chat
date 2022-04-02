@@ -29,8 +29,6 @@ app.use('/api/', apiRoutes)
 
 setupSocketIO(io)
 
-const PORT = process.env.PORT || 5000
-
-server.listen(PORT, () => {
+server.listen(process.env.PORT, () => {
   console.log(`Running server on port: ${PORT}`)
 })
