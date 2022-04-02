@@ -25,8 +25,27 @@ module.exports = {
 
   async store(req, res){
     const { userId } = req
-    const { name } = req.body
-    
+    const { name, password } = req.body
+
+    const [room, hasBeenCreated] = await Room.findOrCreate({
+      where: { name: name },
+      defaults: {
+        name: name,
+        password: password
+      },
+      attributes: { exclude: ['password'] }
+    })
+
+    if(room.hasUser(userId))
+      return res.status(400).json({
+        err: 'user already is in this room'
+      })
+
+    if(!room.auth(password))
+      return res.status(404).json({
+          err: 'wrong room password'
+      })
+
     const user = await User.findByPk(userId)
 
     if(!user)
@@ -34,33 +53,8 @@ module.exports = {
         err: 'user not found'
       })
 
-    const [room, isCreated] = await Room.findOrCreate({
-      where: { name: name },
-      defaults: {
-        name: name
-      }
-    })
-
     await user.addRoom(room)
     
-    return res.json({room, isCreated})
-  },
-
-  async connect(req, res){
-    const { userId } = req
-    const { roomId } = req.body
-
-    const user = await User.findByPk(userId)
-    const rooms = await Room.findAll({
-      where: {
-        id: roomId
-      }
-    })
-
-    rooms.forEach(async room => {
-      await user.addRoom(room)
-    })
-
-    return res.json({ok: true})
+    return res.json({room, hasBeenCreated})
   }
 }

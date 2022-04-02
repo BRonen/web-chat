@@ -21,7 +21,6 @@ router.get('/users', authMiddleware, UserController.index)
 
 router.get('/rooms', authMiddleware, RoomController.index)
       .post('/rooms', authMiddleware, RoomController.store)
-      .post('/rooms/connect', authMiddleware, RoomController.connect)
 
 router.get('/rooms/:roomId/messages', authMiddleware, MessageController.index)
       .post('/rooms/:roomId/messages', authMiddleware, MessageController.store)
