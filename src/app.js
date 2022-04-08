@@ -30,5 +30,5 @@ app.use('/api/', apiRoutes)
 setupSocketIO(io)
 
 server.listen(process.env.PORT, () => {
-  console.log(`Running server on port: ${PORT}`)
+  console.log(`Running server on port: ${process.env.PORT}`)
 })
