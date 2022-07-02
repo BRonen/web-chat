@@ -1,5 +1,5 @@
 {
-  "name": "Voltaire",
+  "name": "web-chat",
   "version": "1.0.0",
   "description": "A web chat",
   "main": "src/app.js",
