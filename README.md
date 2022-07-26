@@ -1,4 +1,4 @@
-# Voltaire
+# Web-chat
 A web chat with realtime broadcast of messages made with express and nodejs.
 
 ## Techs
