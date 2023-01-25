@@ -47,14 +47,20 @@ function authMiddleware(req, res, next){
 function WSmiddleware(socket, next){
   const { token } = socket.handshake.auth
 
-  return verify(token,
+  
+  const [prefix, content] = token.split(' ')
+
+  if (prefix !== 'Bearer') return socket.emit('auth:error', 'invalid prefix')
+
+  return verify(content,
     decoded => {
       socket.userId = decoded.id
       return next()
     },
-    () => (
-      socket.emit('auth:error', 'token invalid')
-    )
+    () => {
+      console.log('aaaa')
+      return socket.emit('auth:error', 'invalid token')
+    }
   )
 }
 

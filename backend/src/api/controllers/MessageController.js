@@ -17,6 +17,11 @@ module.exports = {
       }
     })
 
+    if(!room)
+      return res.status(503).json({
+        err: 'room not found'
+      })
+
     const inRoom = room.hasUser(userId)
 
     if(!inRoom)
@@ -51,9 +56,10 @@ module.exports = {
       }
     })
 
-    req.io.emit('message:send', message.dataValues, author)
+    const messageData = {...message.dataValues, author}
+    req.io.emit('message:send', messageData)
 
-    return res.json({ message, author })
+    return res.json({ message: messageData })
   },
 
   async delete(req, res){

@@ -28,9 +28,11 @@ module.exports = (sequelize, DataTypes) => {
       const salt = await bcrypt.genSalt(10)
       const hash = await bcrypt.hash(room.password, salt)
       room.password = hash
+      return room
     })
   
     Room.prototype.auth = async function(password) {
+      console.log(password, this.password)
       return await bcrypt.compare(password, this.password)
     }
   

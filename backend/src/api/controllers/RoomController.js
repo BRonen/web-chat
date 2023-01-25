@@ -17,7 +17,10 @@ module.exports = {
         attributes: {
           exclude: ['password']
         }
-      }]
+      }],
+      attributes: {
+        exclude: ['password']
+      }
     })
     
     return res.json({rooms})
@@ -33,15 +36,18 @@ module.exports = {
         name: name,
         password: password
       },
-      attributes: { exclude: ['password'] }
     })
 
-    if(room.hasUser(userId))
+    const isUserAlread = await room.hasUser(userId)
+
+    if(isUserAlread)
       return res.status(400).json({
         err: 'user already is in this room'
       })
 
-    if(!room.auth(password))
+    const isPasswordRight = await room.auth(password)
+
+    if(!isPasswordRight)
       return res.status(404).json({
           err: 'wrong room password'
       })

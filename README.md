@@ -1,38 +1,49 @@
-# Web-chat
+# Realtime Web-chat
+
 A web chat with realtime broadcast of messages made with express and nodejs.
 
-## Techs
- - Cors middleware enabled;
- - JWT to authenticate user requests;
- - Bcrypt to do a secure authentication; 
- - Sequelize to storage all users, rooms and messages in a relational db;
- - Using socket.io to broadcast the messages in real time;
+## Backend
 
-Everything has been configured to work with enviroment variables or a .env file, please look at the [ [.env.example](.env.example) ].
+- Bcrypt and JWT to authentication user requests;
+- Sequelize to storage all users, rooms and messages in a relational db;
+- Socket.io to realtime messages broadcast;
 
-<br/>
+## Frontend
 
-# Workflow
+- React and Tailwind to do a stylized and reactive frontend;
+- Zustand and React-query to deal with application and server state management;
+- Socket.io will listen to every new message and update in realtime;
 
-This is how the project works
+---
 
-## User creation, authentication and email verification
+## Backend Routes
 
 List of all routes and the purpose of them:
-  - ```post('/api/users')``` - create a new user unverified.
-  - ```get('/api/users/verify')``` - automatically sended by email to verify user.
-  - ```post('/api/auth')``` - create a new JWT token to use on requests.
-  - ```get('/api/auth')``` - return the user data of token's owner.
-  - ```get('/api/users')``` - same as ```get('/api/auth')```.
-  - ```delete('/api/users')``` - delete the user owner of the token.
-  - ```get('/api/rooms')``` - return all the rooms that the user is in.
-  - ```post('/api/rooms')``` - associate a room to the user and create a room if it doesn't exists.
-  - ```get('/api/rooms/:roomId/messages')``` - get all the old messages if the user is in the room.
-  - ```post('/api/rooms/:roomId/messages')``` - send a message to everyone in the room.
-  - ```delete('/api/rooms/:roomId/messages')``` - delete one or more messages in the room.
 
-<br/>
+- ```post('/api/users')``` - create a new user unverified.
+- ```get('/api/users/verify')``` - automatically sended by email to verify user.
+- ```post('/api/auth')``` - create a new JWT token to use on requests.
+- ```get('/api/auth')``` - return the user data of token's owner.
+- ```get('/api/users')``` - same as ```get('/api/auth')```.
+- ```delete('/api/users')``` - delete the user owner of the token.
+- ```get('/api/rooms')``` - return all the rooms that the user is in.
+- ```post('/api/rooms')``` - associate a room to the user and create a room if it doesn't exists.
+- ```get('/api/rooms/:roomId/messages')``` - get all the old messages if the user is in the room.
+- ```post('/api/rooms/:roomId/messages')``` - send a message to everyone in the room.
+- ```delete('/api/rooms/:roomId/messages')``` - delete one or more messages in the room.
 
-# Still in development
+## Frontend Routes
 
-Front-end will be improved someday, please be patient :)
+- ```/sign-in``` - sign in page (will be redirect to this page if not authenticated)
+- ```/sign-up``` - sign up page
+- ```/``` - the rest of the application runs at here
+
+---
+
+## Still in development
+
+TODO:
+
+- (frontend) Forms validation errors displaying
+- (frontend) Edit modal to editable content
+- (backend) REFACTORING ALL!
