@@ -1,5 +1,6 @@
-import { FormEventHandler, useRef } from 'react'
+import { FormEventHandler, useEffect, useRef } from 'react'
 import { useAuthContext } from '../hooks/useAuth'
+import { useSocketIO } from '../hooks/useSockerIO'
 import useRoomStore from '../stores/useRoomStore'
 
 interface MessageSenderProps { }
@@ -19,7 +20,7 @@ function MessageSender() {
         }
 
         try {
-            const response = await fetch(`http://localhost:5000/api/rooms/${room?.id}/messages`, {
+            const response = await fetch(`https://7dba-186-229-132-149.sa.ngrok.io/api/rooms/${room?.id}/messages`, {
                 method: 'POST',
                 headers: {
                     'Authorization': token!,

@@ -8,8 +8,8 @@ interface RoomCardProps {
 }
 
 function RoomCard({ isCurrent, room, onClick }: RoomCardProps) {
-    return(
-        <button onClick={onClick} style={isCurrent? {
+    return (
+        <button onClick={onClick} style={isCurrent ? {
             border: '1px solid red'
         } : undefined}>
             <h3>{room.name}</h3>
@@ -25,12 +25,12 @@ function RoomList() {
 
     if (error) return <p>{error.toString()}</p>
 
-    if (!rooms || rooms?.length === 0) return <p>No data found</p>
+    if (!rooms || rooms?.length === 0) return <p>No rooms found yet</p>
 
-    return(
-        <nav className="flex flex-col gap-5">
+    return (
+        <nav className="flex flex-col gap-5 overflow-scroll">
             {rooms.map(
-                (room: any, idx: number) => 
+                (room: any, idx: number) =>
                     <RoomCard
                         key={room.id}
                         room={room}

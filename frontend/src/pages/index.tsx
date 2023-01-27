@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import MessageList from '../components/MessageList'
 import MessageSender from '../components/MessageSender'
 import RoomList from '../components/RoomList'
@@ -11,7 +11,7 @@ interface AppProps { }
 
 function App() {
   const navigate = useNavigate()
-  const { token } = useAuthContext()
+  const { token, setToken } = useAuthContext()
   const { setRooms } = useRoomStore()
 
   const loadRooms = async () => {
@@ -27,7 +27,11 @@ function App() {
 
   return (
     <main className="flex gap-12 h-screen">
-      <RoomList />
+      <div className="flex flex-col gap-5 text-center">
+        <Link to="/rooms/new">New Room</Link>
+        <RoomList />
+        <button onClick={() => setToken(null)}>Logout</button>
+      </div>
       <section className="flex flex-col justify-between h-full w-full">
         <MessageList />
         <MessageSender />

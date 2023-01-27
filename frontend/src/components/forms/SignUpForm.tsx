@@ -11,7 +11,6 @@ interface SignUpProps { }
 function SignUpForm() {
     const navigate = useNavigate()
     const formRef = useRef(null)
-    const { token } = useAuthContext()
 
     const submitHandler: FormEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault()
@@ -49,7 +48,7 @@ function SignUpForm() {
 
     return (
         <form ref={formRef} onSubmit={submitHandler}
-            className="w-1/2 h-screen flex flex-col gap-5 mt-[20vh] mx-auto">
+            className="w-1/2 flex flex-col gap-5 pt-[20vh] mx-auto">
 
             <h1 className="text-xl">Sign In</h1>
 

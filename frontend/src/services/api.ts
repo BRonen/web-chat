@@ -1,4 +1,4 @@
-const API = 'http://localhost:5000'
+const API = 'http://localhost:5000/'
 
 export const getMessages = async (token: string | null, roomId?: number) => {
   if (!token) throw new Error('Invalid authentication token')
