@@ -1,4 +1,4 @@
-const API = 'http://localhost:5000/'
+const API = import.meta.env.VITE_API_URL
 
 export const getMessages = async (token: string | null, roomId?: number) => {
   if (!token) throw new Error('Invalid authentication token')
@@ -66,4 +66,18 @@ export const createUser = async (userDataParsed: any) => {
 
   const { message, user } = await response.json()
   return { message, user }
+}
+
+export const createMessage = async (token: string, roomId: number, messageData: any) => {
+  const response = await fetch(`${API}/api/rooms/${roomId}/messages`, {
+    method: 'POST',
+    headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(messageData)
+  })
+  const data = await response.json()
+
+  return data
 }

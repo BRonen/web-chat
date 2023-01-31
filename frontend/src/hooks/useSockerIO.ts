@@ -13,13 +13,11 @@ export const useSocketIO = (eventListeners: Record<string, EventListener>) => {
         if(socket) socket.disconnect()
 
         setSocket(
-            token? io('7dba-186-229-132-149.sa.ngrok.io', { auth: { token } }) : null
+            token? io(import.meta.env.VITE_API_URL, { auth: { token } }) : null
         )
     }, [token])
 
     useEffect(() => {
-        console.log(socket)
-
         if(!socket) return
 
         socket.on('connect', () => {

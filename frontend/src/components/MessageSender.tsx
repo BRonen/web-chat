@@ -1,6 +1,7 @@
 import { FormEventHandler, useEffect, useRef } from 'react'
 import { useAuthContext } from '../hooks/useAuth'
 import { useSocketIO } from '../hooks/useSockerIO'
+import { createMessage } from '../services/api'
 import useRoomStore from '../stores/useRoomStore'
 
 interface MessageSenderProps { }
@@ -15,22 +16,12 @@ function MessageSender() {
         e.preventDefault()
         const data = new FormData(e.target as HTMLFormElement)
 
-        const messageData = {
-            content: data.get('content'),
-        }
+        const messageData = { content: data.get('content') }
 
         try {
-            const response = await fetch(`https://7dba-186-229-132-149.sa.ngrok.io/api/rooms/${room?.id}/messages`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': token!,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(messageData)
-            })
-            const data = await response.json()
+            if (!room) throw new Error('Invalid room id')
 
-            console.log(data)
+            await createMessage(token!, room?.id, messageData)
 
             formRef.current?.reset()
         } catch (e) {
